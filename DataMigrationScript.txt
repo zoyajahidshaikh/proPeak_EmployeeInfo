@@ -1,0 +1,50 @@
+ db.users.find().forEach(function(d){db.tasks.updateMany({userId:d.id},{$set:{userId:d._id}},{upsert:false});})
+ db.tasks.updateMany({subtasks:null},{$set:{subtasks:[]}})
+ 
+ db.subtasks.find().forEach(function(d){db.tasks.findAndModify({query:{id:d.taskId},update:{$push:{subtasks:d}},upsert:true});})
+ db.tasks.update({"subtasks.taskId":{$exists:true}},{$unset:{"subtasks.$.taskId":1}}, {multi:true})
+ db.tasks.update({"subtasks.id":{$exists:true}},{$unset:{"subtasks.$.id":1}}, {multi:true})
+ db.tasks.update({"subtasks.__v":{$exists:true}},{$unset:{"subtasks.$.__v":1}}, {multi:true})
+   
+  db.tasks.updateMany({messages:null},{$set:{messages:[]}})
+  db.tasks.updateMany({uploadFiles:null},{$set:{uploadFiles:[]}})
+ 
+  db.projects.updateMany({messages:null},{$set:{messages:[]}})
+  db.projects.updateMany({uploadFiles:null},{$set:{uploadFiles:[]}})
+  db.projects.updateMany({tasks:null},{$set:{tasks:[]}})
+  db.projects.updateMany({projectUsers:null},{$set:{projectUsers:[]}})
+  
+  db.messages.find().forEach(function(d){db.tasks.findAndModify({query:{id:d.taskId},update:{$push:{messages:d}},upsert:true});})
+ db.tasks.update({"messages.taskId":{$exists:true}},{$unset:{"messages.$.taskId":1}}, {multi:true})
+ db.tasks.update({"messages.projectId":{$exists:true}},{$unset:{"messages.$.projectId":1}}, {multi:true})
+ db.tasks.update({"messages.id":{$exists:true}},{$unset:{"messages.$.id":1}}, {multi:true})
+ db.tasks.update({"messages.__v":{$exists:true}},{$unset:{"messages.$.__v":1}}, {multi:true})
+ 
+  db.uploadFiles.find().forEach(function(d){db.tasks.findAndModify({query:{id:d.taskId},update:{$push:{uploadFiles:d}},upsert:true});})
+  db.tasks.update({"uploadFiles.taskId":{$exists:true}},{$unset:{"uploadFiles.$.taskId":1}}, {multi:true})
+  db.tasks.update({"uploadFiles.projectId":{$exists:true}},{$unset:{"uploadFiles.$.projectId":1}}, {multi:true})
+ db.tasks.update({"uploadFiles.id":{$exists:true}},{$unset:{"uploadFiles.$.id":1}}, {multi:true})
+ db.tasks.update({"uploadFiles.__v":{$exists:true}},{$unset:{"uploadFiles.$.__v":1}}, {multi:true})
+ 
+  db.messages.find().forEach(function(d){db.projects.findAndModify({query:{id:d.projectId},update:{$push:{messages:d}},upsert:true});})
+   db.projects.update({"messages.taskId":{$exists:true}},{$unset:{"messages.$.taskId":1}}, {multi:true})
+   db.projects.update({"messages.projectId":{$exists:true}},{$unset:{"messages.$.projectId":1}}, {multi:true})
+ db.projects.update({"messages.id":{$exists:true}},{$unset:{"messages.$.id":1}}, {multi:true})
+ db.projects.update({"messages.__v":{$exists:true}},{$unset:{"messages.$.__v":1}}, {multi:true})
+ 
+  db.uploadFiles.find().forEach(function(d){db.projects.findAndModify({query:{id:d.projectId},update:{$push:{uploadFiles:d}},upsert:true});})
+  db.projects.update({"uploadFiles.taskId":{$exists:true}},{$unset:{"uploadFiles.$.taskId":1}}, {multi:true})
+  db.projects.update({"uploadFiles.projectId":{$exists:true}},{$unset:{"uploadFiles.$.projectId":1}}, {multi:true})
+ db.projects.update({"uploadFiles.id":{$exists:true}},{$unset:{"uploadFiles.$.id":1}}, {multi:true})
+ db.projects.update({"uploadFiles.__v":{$exists:true}},{$unset:{"uploadFiles.$.__v":1}}, {multi:true})
+  
+ db.projectusers.updateMany({name:null},{$set:{name:""}})
+ db.users.find().forEach(function(d){db.projectusers.updateMany({userId:d.id},{$set:{name:d.name,userId:d._id}},{upsert:false});})
+
+db.projects.updateMany({},{$set:{projectUsers:[]}}) db.projectusers.find().forEach(function(d){db.projects.findAndModify({query:{id:d.projectId},update:{$push:{projectUsers:{_id:d._id,userId:d.userId,name:d.name}}},upsert:false});})
+ 
+ db.tasks.find().forEach(function(d){db.projects.findAndModify({query:{id:d.projectId},update:{$push:{tasks:d}},upsert:false});})
+ 
+
+ db.projects.updateMany({notifyUsers:null},{$set:{notifyUsers:[]}})
+ db.projects.find({_id:ObjectId("5aa8fdbc49a6d42bc445ae94")},{userid:1,projectUsers:1,notifyUsers:1})
