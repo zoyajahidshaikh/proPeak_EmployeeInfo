@@ -318,3 +318,4 @@ db.holidays.insert({"year":2019,"month":10,"monthName":"Oct","date":28,"fullDate
 db.holidays.insert({"year":2019,"month":10,"monthName":"Oct","date":29,"fullDate":"2019-10-29","description":"Diwali-Bhaubeej","type":"","frequency":"yearly","all":"","day":"","dayName":"","isActive":"1"});
 db.holidays.insert({"year":2019,"month":12,"monthName":"Dec","date":25,"fullDate":"2019-12-25","description":"X-mas Eve","type":"","frequency":"yearly","all":"","day":"","dayName":"","isActive":"1"});
 # Employee-Managements
+# Employee-Managements
