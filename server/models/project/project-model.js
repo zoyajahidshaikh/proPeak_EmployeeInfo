@@ -30,6 +30,10 @@ const ProjectSchema = new mongoose.Schema({
   category:{
     type: String
   },
+  // category: [{
+  //   type: String
+  // }],
+  
   userid: {
     type: String
   },

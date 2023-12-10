@@ -35,7 +35,6 @@ export default class ProjectMain extends Component {
       appLevelAccess: this.props.context.state.appLevelAccess,
       showProjectMenuIcons: false,
       showArchive: this.props.context.state.showArchive,
-
     }
 
     this.onGroupChanged = this.onGroupChanged.bind(this);
@@ -164,8 +163,6 @@ export default class ProjectMain extends Component {
   async loadData() {
     await this.getAllProjectsSummary();
   }
-
-
   componentWillReceiveProps(nextProps) {
     this.setState({
       users: nextProps.context.state.users,
@@ -257,7 +254,6 @@ export default class ProjectMain extends Component {
     }
   }
 
-
   async onDeleteProjectById(id) {
     let { response, err } = await projectservice.deleteProject(id);
     if (err) {
@@ -320,10 +316,7 @@ export default class ProjectMain extends Component {
         })
 
       }
-
-
     }
-
   }
 
   async onClickAddFavoriteProject(projectId) {
@@ -391,7 +384,6 @@ export default class ProjectMain extends Component {
     ev.dataTransfer.setData("text/plain", id);
   }
 
-
   onDrop(projectId, cat, ev) {
     ev.preventDefault();
     var projectId = ev.dataTransfer.getData("text");
@@ -427,11 +419,7 @@ export default class ProjectMain extends Component {
   }
 
   render() {
-
-
-
-
-    let projects = this.state.projectsSummary;
+ let projects = this.state.projectsSummary;
     let userRole = Auth.get('userRole');
     // let projectData = projects && projects.filter((p) => {
     //   return p.status !== 'completed' && p.status !== 'onHold';

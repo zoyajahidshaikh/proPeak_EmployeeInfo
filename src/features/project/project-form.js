@@ -97,7 +97,6 @@ export default class ProjectForm extends React.Component {
             }
         }
     }
-
     onSelectUserChanged(e) {
         let selectedUser = e.target.value;
         let notifyUsers = Object.assign([], this.state.notifiedUsers);
@@ -477,7 +476,8 @@ export default class ProjectForm extends React.Component {
     onDeleteAssignCategories(tag) {
         var userRole = Auth.get('userRole');
         if (userRole === 'admin' || userRole === "owner") {
-            if (tag === 'todo' || tag === 'inprogress' || tag === 'completed') {
+            if (tag === '' || tag === '' || tag === '') {
+            // if (tag === 'todo' || tag === 'inprogress' || tag === 'completed') {
                 window.alert('You do not have permission to delete this Category!')
             } else {
                 let categoryTitle = this.state.categories.filter((c) => {

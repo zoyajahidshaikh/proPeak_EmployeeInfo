@@ -8,19 +8,23 @@ import './project.css';
 import * as validate from '../../common/validate-entitlements';
 
 const ProjectList = React.memo((props) => {
+	console.log('Props:', props);
+
 	// const ProjectList = (props) => {
 	// console.log("projectList rendered");
-
-
 	var onMenuIconClick = (id) => {
-		// e.preventDefault();
+		console.log('Clicked Project ID:', id);
 		props.toggleProjectMenuOptions(id);
 	}
 
 	let showProjectMenuIcons = props.showProjectMenuIcons;
 
 	const ON_HOLD = "onHold";
+	console.log('ON_HOLD Constant:', ON_HOLD);
+
 	var { projectsSummary } = props;
+	console.log('Projects Summary:', projectsSummary);
+
 	// projectsSummary.sort((a,b) => (b.activeTasks - a.activeTasks));
 	let userRole = Auth.get('userRole');
 	let groupBy = props.group;
@@ -196,6 +200,8 @@ const ProjectList = React.memo((props) => {
 	}
 
 	let createProjectView = (project) => {
+		console.log('Project Details:', project);
+
 		var users = project.projectUsers;
 		let totalTasks = project.totalTasks;
 		var taskCompleted = project.completedTasks;
@@ -226,18 +232,13 @@ const ProjectList = React.memo((props) => {
 		let auditReportShow = validate.validateAppLevelEntitlements(props.appLevelAccess, 'Audit Report', 'View');
 		let favouritesShow = validate.validateAppLevelEntitlements(props.appLevelAccess, 'Favorite Projects', 'View');
 		let showArchieve = validate.validateAppLevelEntitlements(props.appLevelAccess, 'Projects', 'Archive');
-		// deleteProject = true;
-		// showClone = true;
-		// auditReportShow = true;
-		// } else {
+		// deleteProject = true;// showClone = true;// auditReportShow = true// } else {
 		if (accessRights !== null && accessRights !== undefined && accessRights.length > 0 && userRole === 'user') {
 			deleteProject = validate.validateEntitlements(accessRights, project._id, 'Projects', 'delete');
 			auditReportShow = validate.validateEntitlements(accessRights, project._id, 'Audit Report', 'view');
 			showClone = validate.validateEntitlements(accessRights, project._id, 'Projects', 'clone');
 			showArchieve = validate.validateEntitlements(accessRights, project._id, 'Projects', 'archive');
 		}
-
-
 		let favorite = (favoriteCheck.length > 0) ? true : false
 		var dateToday = new Date();
 		var projectEnddate = new Date(project.enddate);
@@ -284,15 +285,10 @@ const ProjectList = React.memo((props) => {
 									<img src="/images/copy.PNG" alt="Clone" className="task-icons" />
 								</a> : ""}
 
-
-
 								{auditReportShow ? <Link to={'/auditReport/' + project._id} title="Audit Report"
 									className="d-flex">
 									<img src="/images/report.PNG" alt="Audit Report" className="task-icons" />
 								</Link> : ""}
-
-
-
 
 								{favouritesShow ?
 
@@ -310,7 +306,6 @@ const ProjectList = React.memo((props) => {
 										</a> : ""
 								}
 
-
 								{deleteProject ? <a className="d-flex" title="Delete project" onClick={() => {
 									if (window.confirm('Are you sure you wish to delete this project?'))
 										props.onDeleteProjectById(project._id)
@@ -327,11 +322,7 @@ const ProjectList = React.memo((props) => {
 										<img src="/images/paperclip.PNG" alt="Audit Report" className="task-icons" />
 
 									</a>
-
-
 									: ""}
-
-
 
 								{editProject ? <Link to={'/project/edit/' + project._id} className="d-flex" title="Edit project" >
 									{/* <i className="fas fa-pencil-alt"></i> */}
@@ -383,8 +374,6 @@ const ProjectList = React.memo((props) => {
 								{percentageProject}% Complete
 							</div>
 						</div>
-
-
 						<div className=" d-flex justify-content-around bottom-box">
 							<div className="d-flex flex-column align-self-left align-items-center bottom-box-boxes" title="Total Tasks">
 								<span className="valueno">{totalTasks} </span>
@@ -448,7 +437,6 @@ const ProjectList = React.memo((props) => {
 			break;
 		default: break;
 	}
-
 
 	return (
 		<React.Fragment>
