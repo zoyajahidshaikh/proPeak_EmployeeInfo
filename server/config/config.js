@@ -10,7 +10,7 @@ module.exports = Object.freeze({
   link: 'http://172.104.176.113:3000/',
   from: 'propeakpms@gmail.com',
   serverPort: 3001,
-   db: 'mongodb://localhost/tms',
+   db: 'mongodb://localhost/propeakdb',
   // db: 'mongodb://propeak:pro123@localhost/tms',
   taskEmailContent: 'Hi, <br/> <br/> You have been assigned the following. task: <br/><br/> <b> Project </b> : #projectName# <br/> <b> Task </b> : #title#' +
     '<br/> <b> Priority </b> : #priority# <br/> <b> Description </b> : #description# <br/> <br/> To view task details, click <a href="http://172.104.176.113:3000/project/task/edit/#projectId#/#newTaskId#" alt="task">' +

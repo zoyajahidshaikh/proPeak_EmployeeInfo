@@ -40,38 +40,70 @@ export default class CategoryForm extends Component {
         });
     }
    
+    // handleInputChange(event) {
+    //     const value = event.target.value;
+    //     const name = event.target.name;
+
+    //     if (name === 'sequence') {
+    //         this.sequence= event.target.value;
+    //     }
+        
+    //     if (name === 'displayName') {
+    //         if (this.state.category.title === 'todo' || this.state.category.title === 'inprogress' || this.state.category.title === 'completed') {
+    //             this.title = this.state.category.title
+    //         }
+    //         else {
+    //             this.title = value.toLowerCase().split(' ').join('')
+    //         }
+    //     } 
+    //     this.setState({
+    //         category: {
+    //             ...this.state.category,
+    //             [name]: value,
+    //             title: this.title,
+    //             sequence: this.sequence
+    //         },
+    //         msg: '',
+    //     });
+    // }
     handleInputChange(event) {
         const value = event.target.value;
         const name = event.target.name;
-
+    
+        let title = this.state.category.title;
+        let sequence = this.state.category.sequence;
+    
         if (name === 'sequence') {
-            this.sequence= event.target.value;
+            sequence = event.target.value;
         }
-        
+    
         if (name === 'displayName') {
-            if (this.state.category.title === 'todo' || this.state.category.title === 'inprogress' || this.state.category.title === 'completed') {
-                this.title = this.state.category.title
+            if (title === 'todo' || title === 'inprogress' || title === 'completed') {
+                title = title;
+            } else {
+                title = value.toLowerCase().split(' ').join('');
             }
-            else {
-                this.title = value.toLowerCase().split(' ').join('')
-            }
-        } 
+        }
+    
         this.setState({
             category: {
                 ...this.state.category,
                 [name]: value,
-                title: this.title,
-                sequence: this.sequence
+                title: title,
+                sequence: sequence
             },
             msg: '',
         });
     }
+    
 
     onSubmit(e) {
         e.preventDefault();
         var { onSubmit } = this.props;
         let displayNames = this.props.categories.filter((t) => {
-            if(t.displayName == this.state.category.displayName && t.sequence == this.state.category.sequence)
+            // if(t.displayName == this.state.category.displayName && t.sequence == this.state.category.sequence)
+            if (t.displayName === this.state.category.displayName && t.sequence === this.state.category.sequence)
+
             {
                 return t.displayName;
             }
