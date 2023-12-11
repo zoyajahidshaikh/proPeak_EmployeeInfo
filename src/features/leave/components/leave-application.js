@@ -12,9 +12,24 @@ import "./leave.css";
 class LeaveApplication extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      leaveReason: "",
+      workingDays: "1",
+      leaveTypes: [], // Initialize leaveTypes as an empty array
+      fromDate: dateUtil.DateToString(new Date()),
+      toDate: dateUtil.DateToString(new Date()),
+      errorMessage: "",
+      successMessage: "",
+      users: [], // Initialize users as an empty array
+      isLoaded: false,
+      leaveId: this.props.leaveId,
+      holidayList: [],
+      isElegible: false,
+      balanceMessage: "",
+      isHolidayList: false,
+    };
     this.handleChange = this.handleChange.bind(this);
     this.dateCheck = this.dateCheck.bind(this);
-    //this.redirect=this.redirect.bind(this);
     this.onApplyLeave = this.onApplyLeave.bind(this);
     this.postLeaveApplication = this.postLeaveApplication.bind(this);
     this.setValues = this.setValues.bind(this);
@@ -23,22 +38,7 @@ class LeaveApplication extends Component {
     this.onCheckEligibility = this.onCheckEligibility.bind(this);
     this.closeHolidayList = this.closeHolidayList.bind(this);
   }
-  state = {
-    leaveReason: "",
-    workingDays: "1",
-    leaveTypes: this.props.context.state.leaveTypes,
-    fromDate: dateUtil.DateToString(new Date()),
-    toDate: dateUtil.DateToString(new Date()),
-    errorMessage: "",
-    successMessage: "",
-    users: this.props.context.state.users,
-    isLoaded: false,
-    leaveId: this.props.leaveId,
-    holidayList: [],
-    isElegible: false,
-    balanceMessage: "",
-    isHolidayList: false,
-  };
+
   closeHolidayList() {
     this.setState({
       ...this.state,
@@ -424,6 +424,9 @@ class LeaveApplication extends Component {
     } = this.state;
     return (
       <div>
+        {this.state.formError && (
+          <span className="alert alert-danger">{this.state.formError}</span>
+        )}
         {this.state.isLoaded ? (
           <div className="logo">
             <img src="/images/loading.svg" alt="loading" />

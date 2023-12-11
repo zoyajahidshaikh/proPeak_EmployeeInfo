@@ -33,17 +33,18 @@ export default class Dashboard extends React.Component {
       isLoaded: false,
       updatedTime: dateUtil.getTime(),
     });
-  }
-
+  }  
   componentDidMount() {
-    this.refs.iScroll.addEventListener('scroll', () => {
-      if (
-        this.refs.iScroll.scrollTop + this.refs.iScroll.clientHeight >=
-        this.refs.iScroll.scrollHeight
-      ) {
-        this.loadMoreItems();
-      }
-    });
+    if (this.iScroll) {
+      this.iScroll.addEventListener('scroll', () => {
+        if (
+          this.iScroll.scrollTop + this.iScroll.clientHeight >=
+          this.iScroll.scrollHeight
+        ) {
+          this.loadMoreItems();
+        }
+      });
+    }
   }
 
   loadMoreItems() {
