@@ -18,9 +18,11 @@ exports.leaveTypes_get_all = (request, response) => {
     isActive: "true",
   })
     .then((result) => {
+      // console.log("Leave Types Result:", result); 
       response.json(result);
     })
     .catch((err) => {
+      console.error("Error in leaveTypes_get_all:", err); 
       response.json({
         success: false,
         msg: `Something went wrong ${err}`,
@@ -29,7 +31,7 @@ exports.leaveTypes_get_all = (request, response) => {
 };
 
 exports.getUserOnLeaveDetails = (request, response) => {
-  //console.log("getUserOnLeaveDetails server", request.body);
+  console.log("getUserOnLeaveDetails server", request.body);
   let todaysDate = dateUtil.DateToString(new Date());
   let userId = request.body.userId;
   LeaveApplication.find(
@@ -51,17 +53,17 @@ exports.getUserOnLeaveDetails = (request, response) => {
     }
   )
     .then((result) => {
-      // console.log("result", result);
+      console.log("result", result);
       let checkValue = false;
       if (result.length > 0) {
         for (let i = 0; i < result.length; i++) {
           let startDate = dateUtil.DateToString(result[i].fromDate);
-          // console.log("startDate", startDate);
+          console.log("startDate", startDate);
           let endDate = dateUtil.DateToString(result[i].toDate);
-          // console.log("endDate", endDate);
-          // console.log("todaysDate", todaysDate)
+          console.log("endDate", endDate);
+          console.log("todaysDate", todaysDate);
           if (startDate === todaysDate || endDate === todaysDate) {
-            // console.log("truse",[i]);
+            console.log("true", [i]);
             checkValue = true;
           }
         }
@@ -77,6 +79,7 @@ exports.getUserOnLeaveDetails = (request, response) => {
       }
     })
     .catch((err) => {
+      console.error("Error in getUserOnLeaveDetails:", err); // Log the error
       response.json({
         success: false,
         msg: `Something went wrong ${err}`,
@@ -84,9 +87,9 @@ exports.getUserOnLeaveDetails = (request, response) => {
     });
 };
 
-//getall leave for admin
+//getAll leave for admin
 exports.getAllAppliedLeavesforAdmin = (request, response) => {
-  // console.log("getAllAppliedLeavesforAdmin server");
+  console.log("getAllAppliedLeavesforAdmin server"); // Log the start of function execution
   LeaveApplication.find(
     {
       isDeleted: false,
@@ -105,7 +108,7 @@ exports.getAllAppliedLeavesforAdmin = (request, response) => {
     }
   )
     .then((result) => {
-      // console.log("result", result);
+      console.log("result", result); // Log the retrieved results from the database
       let finalResult = result.map((r) => {
         let createdOn = dateUtil.DateToString(r.createdOn);
 
@@ -126,6 +129,7 @@ exports.getAllAppliedLeavesforAdmin = (request, response) => {
       response.json(finalResult);
     })
     .catch((err) => {
+      console.error("Error in getAllAppliedLeavesforAdmin:", err); // Log any errors that occur
       response.json({
         success: false,
         msg: `Something went wrong ${err}`,
@@ -134,8 +138,8 @@ exports.getAllAppliedLeavesforAdmin = (request, response) => {
 };
 
 // Save the leave application
-
 exports.leaveApplicationSave = async (request, response) => {
+  console.log(request,response,"zozozozozzozozzozoz")
   try {
     const {
       createdBy,
@@ -174,8 +178,9 @@ exports.leaveApplicationSave = async (request, response) => {
       status: "pending",
       rejectionReason: "",
     });
-
+    console.log('Received leave application:', request.body.leaveApplication); // Log received leave application
     const savedLeave = await newLeaveApplication.save();
+    console.log('Saved leave application:', savedLeave); // Log saved leave application
 
     logInfo(savedLeave, "Applied for leave");
 

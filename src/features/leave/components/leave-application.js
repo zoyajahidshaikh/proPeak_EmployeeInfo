@@ -59,6 +59,9 @@ class LeaveApplication extends Component {
   async setValues() {
     let leaveId = this.props.leaveId;
     let { response, err } = await leaveApplicationService.getDetails(leaveId);
+    console.log("Response from getDetails:", response);
+    console.log("Error from getDetails:", err);
+
     this.setState({
       isLoaded: true,
     });
@@ -90,6 +93,8 @@ class LeaveApplication extends Component {
   handleChange(e) {
     let name = e.target.name;
     let value = e.target.value;
+    console.log("Name:", name);
+    console.log("Value:", value);
     if (name === "leaveType") {
       if (value === "") {
         this.setState({
@@ -145,7 +150,8 @@ class LeaveApplication extends Component {
           diffDays = diffDays + 1;
           document.querySelector("#workingDays").value = diffDays;
         }
-
+        console.log("From Date:", this.state.fromDate);
+        console.log("To Date:", this.state.toDate);
         this.setState({
           submitDisabled: false,
           errorMessage: "",
@@ -251,6 +257,13 @@ class LeaveApplication extends Component {
 
   onApplyLeave(event) {
     event.preventDefault();
+
+    // Log to check if function is triggered
+    console.log("onApplyLeave function called");
+
+    // Log values of specific variables
+    console.log("State:", this.state);
+
     let createdBy = Auth.get("userId");
     let modifiedBy = Auth.get("userId");
     let createdOn = new Date();
@@ -263,6 +276,25 @@ class LeaveApplication extends Component {
     var dropdwn = document.getElementById("leaveType");
     let datavalue =
       dropdwn.options[dropdwn.selectedIndex].getAttribute("data-value");
+
+    // Log values before creating the leave application object
+    console.log("Values before creating leave application:", {
+      createdBy,
+      modifiedBy,
+      createdOn,
+      modifiedOn,
+      emailId,
+      userName,
+      datavalue,
+      stateFromDate: this.state.fromDate,
+      stateToDate: this.state.toDate,
+      stateWorkingDays: this.state.workingDays,
+      stateLeaveReason: this.state.leaveReason,
+      stateLeaveType: this.state.leaveType,
+      stateLeaveCategory: this.state.leaveCategory,
+      stateLeaveId: this.state.leaveId,
+    });
+
     let leaveApplication = {
       userName: userName,
       fromEmail: emailId,
@@ -280,31 +312,37 @@ class LeaveApplication extends Component {
       isDeleted: "false",
       leaveId: "",
     };
+
     if (this.state.leaveId !== "") {
       leaveApplication.leaveId = this.state.leaveId;
     }
     let users = this.state.users;
 
+    // Log the leave application object before posting
+    console.log("Leave application object before posting:", leaveApplication);
+
     this.postLeaveApplication(leaveApplication, users);
   }
   async postLeaveApplication(leaveApplication, user) {
-    let response = { response: "", err: "" };
-    if (!isNullOrUndefined(leaveApplication.leaveId)) {
-      response = await leaveApplicationService.editLeaveApplication(
-        leaveApplication,
-        user
-      );
-    } else {
-      response = await leaveApplicationService.saveLeaveApplication(
-        leaveApplication,
-        user
-      );
-    }
+    try {
+      console.log("Leave Application Data:", leaveApplication);
+      console.log("User Data:", user);
+      let response = { response: "", err: "" };
+      if (
+        leaveApplication.leaveId === null ||
+        leaveApplication.leaveId === undefined
+      ) {
+        response = await leaveApplicationService.editLeaveApplication(
+          leaveApplication,
+          user
+        );
+      } else {
+        response = await leaveApplicationService.saveLeaveApplication(
+          leaveApplication,
+          user
+        );
+      }
 
-    this.setState({
-      isLoaded: true,
-    });
-    if (response.err) {
       this.setState({
         isLoaded: false,
         fromDate: dateUtil.DateToString(new Date()),
@@ -313,36 +351,86 @@ class LeaveApplication extends Component {
         leaveReason: "",
         leaveType: "",
         balanceMessage: "",
-        errorMessage: "Error : " + response.err,
       });
-    } else if (response.response && response.response.data.err) {
+
+      if (response.err || (response.response && response.response.data.err)) {
+        const errorMessage = response.err || response.response.data.err;
+        this.setState({
+          errorMessage: "Error: " + errorMessage,
+        });
+      } else {
+        this.setState({
+          successMessage: response.response.data.message,
+          leaveCategory: "",
+        });
+      }
+    } catch (error) {
+      console.error("Error occurred:", error);
+
       this.setState({
         isLoaded: false,
-        fromDate: dateUtil.DateToString(new Date()),
-        toDate: dateUtil.DateToString(new Date()),
-        workingDays: "1",
-        leaveReason: "",
-        leaveType: "",
-        balanceMessage: "",
-        errorMessage: "Error : " + response.response.data.err,
+        errorMessage: "Error: " + error.message,
       });
-    } else {
-      this.setState({
-        isLoaded: false,
-        fromDate: dateUtil.DateToString(new Date()),
-        toDate: dateUtil.DateToString(new Date()),
-        workingDays: "1",
-        leaveReason: "",
-        leaveType: "",
-        balanceMessage: "",
-        successMessage: response.response.data.message,
-        leaveCategory: "",
-      });
-      // setTimeout(function () {
-      //     window.location.href = "/leave"
-      // }, 5000);
     }
   }
+
+  // async postLeaveApplication(leaveApplication, user) {
+  //   let response = { response: "", err: "" };
+  //   // if (!isNullOrUndefined(leaveApplication.leaveId)) {
+  //     if (leaveApplication.leaveId === null || leaveApplication.leaveId === undefined) {
+  //     response = await leaveApplicationService.editLeaveApplication(
+  //       leaveApplication,
+  //       user
+  //     );
+  //   } else {
+  //     response = await leaveApplicationService.saveLeaveApplication(
+  //       leaveApplication,
+  //       user
+  //     );
+  //   }
+
+  //   this.setState({
+  //     isLoaded: true,
+  //   });
+  //   if (response.err) {
+  //     this.setState({
+  //       isLoaded: false,
+  //       fromDate: dateUtil.DateToString(new Date()),
+  //       toDate: dateUtil.DateToString(new Date()),
+  //       workingDays: "1",
+  //       leaveReason: "",
+  //       leaveType: "",
+  //       balanceMessage: "",
+  //       errorMessage: "Error : " + response.err,
+  //     });
+  //   } else if (response.response && response.response.data.err) {
+  //     this.setState({
+  //       isLoaded: false,
+  //       fromDate: dateUtil.DateToString(new Date()),
+  //       toDate: dateUtil.DateToString(new Date()),
+  //       workingDays: "1",
+  //       leaveReason: "",
+  //       leaveType: "",
+  //       balanceMessage: "",
+  //       errorMessage: "Error : " + response.response.data.err,
+  //     });
+  //   } else {
+  //     this.setState({
+  //       isLoaded: false,
+  //       fromDate: dateUtil.DateToString(new Date()),
+  //       toDate: dateUtil.DateToString(new Date()),
+  //       workingDays: "1",
+  //       leaveReason: "",
+  //       leaveType: "",
+  //       balanceMessage: "",
+  //       successMessage: response.response.data.message,
+  //       leaveCategory: "",
+  //     });
+  //     // setTimeout(function () {
+  //     //     window.location.href = "/leave"
+  //     // }, 5000);
+  //   }
+  // }
 
   dateUpdate = (name, updatedDate) => {
     // console.log("updatedDate", updatedDate);
@@ -634,7 +722,7 @@ class LeaveApplication extends Component {
                               value="Apply"
                               className="btn btn-info btn-block"
                               disabled={
-                                this.state.leaveType === "Comp Off"
+                                this.state.leaveTypes === "Comp Off"
                                   ? !(
                                       workingDays &&
                                       fromDate &&
@@ -643,8 +731,8 @@ class LeaveApplication extends Component {
                                       leaveReason &&
                                       leaveCategory
                                     )
-                                  : this.state.leaveType === "Sick Leave" ||
-                                    this.state.leaveType === "Casual Leave"
+                                  : this.state.leaveTypes === "Sick Leave" ||
+                                    this.state.leaveTypes === "Casual Leave"
                                   ? !(
                                       isElegible &&
                                       workingDays &&
