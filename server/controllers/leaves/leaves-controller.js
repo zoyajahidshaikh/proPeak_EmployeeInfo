@@ -12,131 +12,6 @@ const dateUtil = require("../../utils/date-util");
 var pascalCase = require("pascal-case");
 var holidayList = [];
 
-//Get all Leave Types
-exports.leaveTypes_get_all = (request, response) => {
-  LeaveType.find({
-    isActive: "true",
-  })
-    .then((result) => {
-      // console.log("Leave Types Result:", result); 
-      response.json(result);
-    })
-    .catch((err) => {
-      console.error("Error in leaveTypes_get_all:", err); 
-      response.json({
-        success: false,
-        msg: `Something went wrong ${err}`,
-      });
-    });
-};
-
-exports.getUserOnLeaveDetails = (request, response) => {
-  console.log("getUserOnLeaveDetails server", request.body);
-  let todaysDate = dateUtil.DateToString(new Date());
-  let userId = request.body.userId;
-  LeaveApplication.find(
-    {
-      isDeleted: false,
-      userId: userId,
-    },
-    {
-      _id: 1,
-      leaveType: 1,
-      status: 1,
-      userName: 1,
-      fromEmail: 1,
-      fromDate: 1,
-      toDate: 1,
-      workingDays: 1,
-      createdOn: 1,
-      leaveWithoutApproval: 1,
-    }
-  )
-    .then((result) => {
-      console.log("result", result);
-      let checkValue = false;
-      if (result.length > 0) {
-        for (let i = 0; i < result.length; i++) {
-          let startDate = dateUtil.DateToString(result[i].fromDate);
-          console.log("startDate", startDate);
-          let endDate = dateUtil.DateToString(result[i].toDate);
-          console.log("endDate", endDate);
-          console.log("todaysDate", todaysDate);
-          if (startDate === todaysDate || endDate === todaysDate) {
-            console.log("true", [i]);
-            checkValue = true;
-          }
-        }
-      }
-      if (checkValue === true) {
-        response.json({
-          data: "On Leave",
-        });
-      } else {
-        response.json({
-          data: "",
-        });
-      }
-    })
-    .catch((err) => {
-      console.error("Error in getUserOnLeaveDetails:", err); // Log the error
-      response.json({
-        success: false,
-        msg: `Something went wrong ${err}`,
-      });
-    });
-};
-
-//getAll leave for admin
-exports.getAllAppliedLeavesforAdmin = (request, response) => {
-  console.log("getAllAppliedLeavesforAdmin server"); // Log the start of function execution
-  LeaveApplication.find(
-    {
-      isDeleted: false,
-    },
-    {
-      _id: 1,
-      leaveType: 1,
-      status: 1,
-      createdOn: 1,
-      userName: 1,
-      fromEmail: 1,
-      fromDate: 1,
-      toDate: 1,
-      workingDays: 1,
-      leaveWithoutApproval: 1,
-    }
-  )
-    .then((result) => {
-      console.log("result", result); // Log the retrieved results from the database
-      let finalResult = result.map((r) => {
-        let createdOn = dateUtil.DateToString(r.createdOn);
-
-        let leave = {
-          leaveId: r._id,
-          userName: r.userName,
-          createdOn: createdOn,
-          fromEmail: r.fromEmail,
-          fromDate: r.fromDate,
-          toDate: r.toDate,
-          workingDays: r.workingDays,
-          leaveType: r.leaveType,
-          status: pascalCase(r.status),
-          leaveWithoutApproval: r.leaveWithoutApproval,
-        };
-        return leave;
-      });
-      response.json(finalResult);
-    })
-    .catch((err) => {
-      console.error("Error in getAllAppliedLeavesforAdmin:", err); // Log any errors that occur
-      response.json({
-        success: false,
-        msg: `Something went wrong ${err}`,
-      });
-    });
-};
-
 // Save the leave application
 exports.leaveApplicationSave = async (request, response) => {
   console.log(request,response,"zozozozozzozozzozoz")
@@ -267,113 +142,131 @@ exports.leaveApplicationSave = async (request, response) => {
   }
 };
 
-// exports.leaveApplicationSave = ((request, response) => {
-//     let newLeaveApplication = new LeaveApplication({
-//         userId: request.body.leaveApplication.createdBy,
-//         userName: request.body.leaveApplication.userName,
-//         fromEmail: request.body.leaveApplication.fromEmail,
-//         fromDate: request.body.leaveApplication.fromDate,
-//         toDate: request.body.leaveApplication.toDate,
-//         workingDays: request.body.leaveApplication.workingDays,
-//         reason: request.body.leaveApplication.reason,
-//         leaveTypeId: request.body.leaveApplication.leaveTypeId,
-//         leaveType: request.body.leaveApplication.leaveType,
-//         createdBy: request.body.leaveApplication.createdBy,
-//         createdOn: request.body.leaveApplication.createdOn,
-//         modifiedBy: request.body.leaveApplication.modifiedBy,
-//         modifiedOn: request.body.leaveApplication.modifiedOn,
-//         leaveCategory: request.body.leaveApplication.leaveCategory,
-//         isDeleted: request.body.leaveApplication.isDeleted,
-//         status: "pending",
-//         rejectionReason: '',
-//         leaveWithoutApproval: request.body.leaveWithoutApproval
-//     })
-//     let inputFromDate = Date.parse(newLeaveApplication.fromDate);
-//     let inputToDate = Date.parse(newLeaveApplication.toDate);
-//     let newFromDate = new Date(inputFromDate);
-//     let newToDate = new Date(inputToDate);
-//     let date = 1,
-//         month = 1,
-//         year = 1;
-//     date = newToDate.getDate();
-//     month = newToDate.getMonth();
-//     year = newToDate.getFullYear();
-//     holidayValidation.init(newFromDate, config.totalCasualLeaves, config.totalSickLeaves);
-//     let message = 1;
+//Get all Leave Types
+exports.leaveTypes_get_all = (request, response) => {
+  LeaveType.find({
+    isActive: "true",
+  })
+    .then((result) => {
+      // console.log("Leave Types Result:", result); 
+      response.json(result);
+    })
+    .catch((err) => {
+      console.error("Error in leaveTypes_get_all:", err); 
+      response.json({
+        success: false,
+        msg: `Something went wrong ${err}`,
+      });
+    });
+};
 
-//     newLeaveApplication.save()
-//         .then((result) => {
-//             logInfo(result, "Applied for leave");
-//             let loggedInUserId = request.userInfo.userId;
-//             let reportingManagerId = 1;
-//             let toEmail = 1;
-//             let bodyHtml = config.leaveEmailContent;
-//             let subject = config.leaveSubject;
-//             let leaveType = 1;
-//             bodyHtml = bodyHtml.replace("{fromDate}", request.body.leaveApplication.fromDate);
-//             bodyHtml = bodyHtml.replace("{toDate}", request.body.leaveApplication.toDate);
-//             bodyHtml = bodyHtml.replace("{workingDays}", request.body.leaveApplication.workingDays);
-//             bodyHtml = bodyHtml.replace("{leaveType}", request.body.leaveApplication.leaveType);
-//             bodyHtml = bodyHtml.replace("{reason}", request.body.leaveApplication.reason);
-//             bodyHtml = bodyHtml.replace("{leaveId}", result._id)
-//            // bodyHtml = bodyHtml.replace("{userName}", request.body.leaveApplication.userName);
+exports.getUserOnLeaveDetails = (request, response) => {
+  console.log("getUserOnLeaveDetails server", request.body);
+  let todaysDate = dateUtil.DateToString(new Date());
+  let userId = request.body.userId;
+  LeaveApplication.find(
+    {
+      isDeleted: false,
+      userId: userId,
+    },
+    {
+      _id: 1,
+      leaveType: 1,
+      status: 1,
+      userName: 1,
+      fromEmail: 1,
+      fromDate: 1,
+      toDate: 1,
+      workingDays: 1,
+      createdOn: 1,
+      leaveWithoutApproval: 1,
+    }
+  )
+    .then((result) => {
+      console.log("result", result);
+      let checkValue = false;
+      if (result.length > 0) {
+        for (let i = 0; i < result.length; i++) {
+          let startDate = dateUtil.DateToString(result[i].fromDate);
+          console.log("startDate", startDate);
+          let endDate = dateUtil.DateToString(result[i].toDate);
+          console.log("endDate", endDate);
+          console.log("todaysDate", todaysDate);
+          if (startDate === todaysDate || endDate === todaysDate) {
+            console.log("true", [i]);
+            checkValue = true;
+          }
+        }
+      }
+      if (checkValue === true) {
+        response.json({
+          data: "On Leave",
+        });
+      } else {
+        response.json({
+          data: "",
+        });
+      }
+    })
+    .catch((err) => {
+      console.error("Error in getUserOnLeaveDetails:", err); // Log the error
+      response.json({
+        success: false,
+        msg: `Something went wrong ${err}`,
+      });
+    });
+};
 
-//             subject = subject.replace("{fromDate}", request.body.leaveApplication.fromDate)
-//                 .replace("{toDate}", request.body.leaveApplication.toDate)
-//                 .replace("{userName}", request.body.leaveApplication.userName);
-//             var mailOptions = {
-//                 from: request.body.leaveApplication.fromEmail,
-//                 to: 1,
-//                 subject: subject,
-//                 html: bodyHtml
-//             };
-//             if (config.prodMode === "ON") {
-//                 userModel.findOne({
-//                     "_id": loggedInUserId
-//                 }, {
-//                         "reportingManagerId": 1
-//                     }).then((result) => {
-//                         reportingManagerId = result.reportingManagerId;
-//                         userModel.findOne({
-//                             "_id": reportingManagerId
-//                         }, {}).then((result) => {
-//                             if (result) {
-//                                 toEmail = result.email;
-//                                 mailOptions.to = toEmail;
-//                                 mailOptions.cc = config.applytoEmail;
-//                                 let response = sendEmail(mailOptions);
-//                                 if (response.response) {
-//                                     logInfo(response, 'leaveController.leaveApplicationSave - Error occured while sending email ' + mailOptions.to);
-//                                 } else {
-//                                     logInfo('leaveController.leaveApplicationSave - An e-mail has been sent to ' + mailOptions.to + ' with further instructions.');
-//                                 }
-//                             }
+//getAll leave for admin
+exports.getAllAppliedLeavesforAdmin = (request, response) => {
+  console.log("getAllAppliedLeavesforAdmin server"); // Log the start of function execution
+  LeaveApplication.find(
+    {
+      isDeleted: false,
+    },
+    {
+      _id: 1,
+      leaveType: 1,
+      status: 1,
+      createdOn: 1,
+      userName: 1,
+      fromEmail: 1,
+      fromDate: 1,
+      toDate: 1,
+      workingDays: 1,
+      leaveWithoutApproval: 1,
+    }
+  )
+    .then((result) => {
+      console.log("result", result); // Log the retrieved results from the database
+      let finalResult = result.map((r) => {
+        let createdOn = dateUtil.DateToString(r.createdOn);
 
-//                         })
-//                     });
+        let leave = {
+          leaveId: r._id,
+          userName: r.userName,
+          createdOn: createdOn,
+          fromEmail: r.fromEmail,
+          fromDate: r.fromDate,
+          toDate: r.toDate,
+          workingDays: r.workingDays,
+          leaveType: r.leaveType,
+          status: pascalCase(r.status),
+          leaveWithoutApproval: r.leaveWithoutApproval,
+        };
+        return leave;
+      });
+      response.json(finalResult);
+    })
+    .catch((err) => {
+      console.error("Error in getAllAppliedLeavesforAdmin:", err); // Log any errors that occur
+      response.json({
+        success: false,
+        msg: `Something went wrong ${err}`,
+      });
+    });
+};
 
-//             } else {
-//                 toEmail = config.defaultEmail;
-//                 mailOptions.to = toEmail;
-//                 let response = sendEmail(mailOptions);
-//                 if (response.response) {
-//                     logInfo(response, 'leaveController.leaveApplicationSave - Error occured while sending email ' + mailOptions.to);
-//                     response.json({
-//                         success: false,
-//                         err: "Something went wrong : Email Id is wrong for sending to."
-//                     })
-//                 } else {
-//                     logInfo('leaveController.leaveApplicationSave - An e-mail has been sent to ' + mailOptions.to + ' with further instructions.');
-
-//                 }
-//             }
-
-//         });
-//     response.json({
-//         success: true,
-//         message: "Leave has been applied successfully." //+ message
-//     });
-// });
 
 exports.getAllLeaves = (request, response) => {
   // checking for current logged in user details
