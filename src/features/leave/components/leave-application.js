@@ -22,7 +22,8 @@ class LeaveApplication extends Component {
       successMessage: "",
       users: [], // Initialize users as an empty array
       isLoaded: false,
-      leaveId: this.props.leaveId,
+      // leaveId: this.props.leaveId,
+      leaveId:"2",
       holidayList: [],
       isElegible: false,
       balanceMessage: "",
@@ -312,6 +313,8 @@ class LeaveApplication extends Component {
       isDeleted: "false",
       leaveId: "",
     };
+    console.log("Leave application object before posting:", leaveApplication);
+
 
     if (this.state.leaveId !== "") {
       leaveApplication.leaveId = this.state.leaveId;
@@ -319,9 +322,10 @@ class LeaveApplication extends Component {
     let users = this.state.users;
 
     // Log the leave application object before posting
-    console.log("Leave application object before posting:", leaveApplication);
 
     this.postLeaveApplication(leaveApplication, users);
+    console.log("Leave application object after posting:", leaveApplication);
+
   }
   async postLeaveApplication(leaveApplication, user) {
     try {
