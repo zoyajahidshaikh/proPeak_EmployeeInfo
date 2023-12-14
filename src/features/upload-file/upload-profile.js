@@ -23,20 +23,30 @@ export default class ProfilePicture extends React.Component {
 
     handleFileUpload(e) {
         let reader = new FileReader();
-      
-        let file=e.target.files[0]
-       
-        reader.onloadend = () => {
+        let file = e.target.files[0];
+    
+        if (file) {
+            reader.onloadend = () => {
+                this.setState({
+                    uploadFile: file,
+                    message: '',
+                    errMessage: '',
+                    imagePreviewUrl: reader.result
+                });
+            };
+    
+            reader.readAsDataURL(file);
+        } else {
+            // Handle the case where no file is selected
             this.setState({
-                uploadFile: file,
+                uploadFile: null,
                 message: '',
-                errMessage:'',
-              imagePreviewUrl: reader.result
+                errMessage: 'Please select a file',
+                imagePreviewUrl: ''
             });
-          }
-      
-          reader.readAsDataURL(file)
+        }
     }
+    
 
     async uploadFile(formData) {
         let { response, err } = await uploadprofileservice.postFile(formData);
