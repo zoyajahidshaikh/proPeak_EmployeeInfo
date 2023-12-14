@@ -2,30 +2,271 @@ import React, { Component } from "react";
 import DataTable from "../../../Components/datatable";
 import config from "../../../common/config";
 import { Link } from "react-router-dom";
+//import axios from 'axios';
 import * as leaveApplicationService from "../../../Services/leave-service/leave-service";
 import Auth from "../../../utils/auth";
-// import FullCalendar from 'fullcalendar-reactwrapper';
 import FullCalendar from "fullcalendar-reactwrapper";
 import "./leave.css";
 
 class LeaveList extends Component {
   constructor(props) {
     super(props);
+    this.onSelectViewChange = this.onSelectViewChange.bind(this);
     this.state = {
       leaveApplication: {},
       isLoaded: false,
       leaveDetails: {},
-      leaveId: this.props.leaveId || null, // Handle absence of leaveId prop
+      leaveId: this.props.leaveId,
       errorMessage: "",
       successMessage: "",
       checked: "",
-      startDate: "", // Consider setting default values if needed
-      endDate: "", // Consider setting default values if needed
+
       appliedLeaveheaders: [
-        // Define your headers here
+        { title: "Leave Title", accessor: "leaveType", index: 1 },
+        { title: "From Date", accessor: "fromDate", index: 2 },
+        { title: "To Date", accessor: "toDate", index: 3 },
+        { title: "Duration", accessor: "workingDays", index: 4 },
+        { title: "Application Date", accessor: "createdOn", index: 5 },
+        { title: "Status", accessor: "status", index: 6 },
+        {
+          title: "Action",
+          index: 7,
+          cell: (row) => {
+            // let url = "/projects/" + row.userId;
+            // let l;
+            if (row.status === "pending" || row.status === "rejected") {
+              let url = "/leave-edit/" + row.leaveId;
+              return (
+                <div>
+                  <Link className="btn btn-xs btn-outline-info" to={url}>
+                    <i className="fas fa-pencil-alt"></i>
+                  </Link>
+                  <span>&nbsp;</span>
+                  {/* <Link to="#" ><i className="fas fa-trash"></i></Link> */}
+                  <span
+                    className="btn btn-xs btn-outline-danger mr-1"
+                    title="Delete"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Are you sure you wish to delete this entry?"
+                        )
+                      )
+                        this.onDeleteListId(row.leaveId);
+                    }}
+                  >
+                    <i className="far fa-trash-alt"></i>
+                  </span>
+
+                  <span>&nbsp;</span>
+                  {Auth.get("userRole") === "admin" ? (
+                    <span
+                      className="btn btn-xs btn-outline-success mr-1"
+                      title="Approve"
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Are you sure you wish to Approve this entry?"
+                          )
+                        )
+                          this.onApproveListId(row.leaveId);
+                      }}
+                    >
+                      <i className="far fa-trash-alt"></i>
+                    </span>
+                  ) : (
+                    ""
+                  )}
+
+                  {/* <span>&nbsp;</span> */}
+                  {Auth.get("userRole") === "admin" ? (
+                    <span
+                      className="btn btn-xs btn-outline-dark mr-1"
+                      title="Reject"
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Are you sure you wish to reject this entry?"
+                          )
+                        )
+                          this.onRejectListId(row.leaveId);
+                      }}
+                    >
+                      <i className="far fa-trash-alt"></i>
+                    </span>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              );
+            } else {
+              let url = "/leave-details/" + row.leaveId;
+              return (
+                <div>
+                  {Auth.get("userRole") !== "support" ? (
+                    <span title="Details">
+                      <Link className="btn btn-xs btn-outline-warning" to={url}>
+                        <i
+                          className="far fa-file"
+                          style={{ fontSize: "10px" }}
+                        ></i>
+                      </Link>
+                    </span>
+                  ) : (
+                    ""
+                  )}
+                  <span>&nbsp;</span>
+                  {/* <Link to="#" ><i className="fas fa-trash"></i></Link> */}
+                  {Auth.get("userRole") !== "support" ? (
+                    <span
+                      className="btn btn-xs btn-outline-danger"
+                      title="Delete"
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Are you sure you wish to delete this entry?"
+                          )
+                        )
+                          this.onDeleteListId(row.leaveId);
+                      }}
+                    >
+                      <i className="far fa-trash-alt"></i>
+                    </span>
+                  ) : (
+                    ""
+                  )}
+
+                  <span>&nbsp;</span>
+                  {Auth.get("userRole") === "admin" ? (
+                    <span
+                      className="btn btn-xs btn-outline-success mr-1"
+                      title="Approve"
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Are you sure you wish to Approve this entry?"
+                          )
+                        )
+                          this.onApproveListId(row.leaveId);
+                      }}
+                    >
+                      <i className="far fa-check-square"></i>
+                    </span>
+                  ) : (
+                    ""
+                  )}
+                  {/* <span>&nbsp;</span> */}
+
+                  {Auth.get("userRole") === "admin" ? (
+                    <span
+                      className="btn btn-xs btn-outline-dark mr-1"
+                      title="Reject"
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Are you sure you wish to Reject this entry?"
+                          )
+                        )
+                          this.onRejectListId(row.leaveId);
+                      }}
+                    >
+                      <i className="far fa-ban"></i>
+                    </span>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              );
+            }
+          },
+        },
       ],
       userAppliedLeaveheaders: [
-        // Define your headers here
+        { title: "Leaves Applied Reportees", accessor: "userName", index: 1 },
+        { title: "Leave Title", accessor: "leaveType", index: 2 },
+        { title: "From Date", accessor: "fromDate", index: 3 },
+        { title: "To Date", accessor: "toDate", index: 4 },
+        { title: "Duration", accessor: "workingDays", index: 5 },
+        { title: "Application Date", accessor: "createdOn", index: 6 },
+        { title: "Status", accessor: "status", index: 7 },
+        {
+          title: "Actions",
+          index: 8,
+          cell: (row) => {
+            let url = "/leave-details/" + row.leaveId;
+            return (
+              <div>
+                {Auth.get("userRole") !== "support" ? (
+                  <Link className="btn btn-xs btn-outline-warning" to={url}>
+                    <i className="far fa-file"></i>
+                  </Link>
+                ) : (
+                  ""
+                )}
+                <span>&nbsp;</span>
+                {/* <Link to="#" ><i className="fas fa-trash"></i></Link> */}
+                {Auth.get("userRole") !== "support" ? (
+                  <a
+                    className="btn btn-xs btn-outline-danger"
+                    title="Delete"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Are you sure you wish to delete this entry?"
+                        )
+                      )
+                        this.onDeleteListId(row.leaveId);
+                    }}
+                  >
+                    <i className="far fa-trash-alt "></i>
+                  </a>
+                ) : (
+                  ""
+                )}
+
+                <span>&nbsp;</span>
+                {Auth.get("userRole") === "admin" ? (
+                  <a
+                    className="btn btn-xs btn-outline-success mr-1"
+                    title="Approve"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Are you sure you wish to Approve this entry?"
+                        )
+                      )
+                        this.onApproveListId(row.leaveId);
+                    }}
+                  >
+                    <i className="far fa-trash-alt"></i>
+                  </a>
+                ) : (
+                  ""
+                )}
+
+                <span>&nbsp;</span>
+                {Auth.get("userRole") === "admin" ? (
+                  <a
+                    className="btn btn-xs btn-outline-dark mr-1"
+                    title="Reject"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Are you sure you wish to Reject this entry?"
+                        )
+                      )
+                        this.onRejectListId(row.leaveId);
+                    }}
+                  >
+                    <i className="far fa-trash-alt"></i>
+                  </a>
+                ) : (
+                  ""
+                )}
+              </div>
+            );
+          },
+        },
       ],
       appliedLeave: [],
       appliedLeaveByUsers: [],
@@ -33,137 +274,30 @@ class LeaveList extends Component {
       calendarData: [],
       selectedView: "DatatableView",
     };
-
-    this.onSelectViewChange = this.onSelectViewChange.bind(this);
   }
-  handleInputChange = (event) => {
-    // Update state when form fields change
-    const { name, value } = event.target;
-    this.setState({ [name]: value });
-  };
-//   handleSubmit = async (event) => {
-//     event.preventDefault();
-//     try {
-//       // Create a data object from form fields in state
-//       const leaveData = {
-//         startDate: this.state.startDate,
-//         endDate: this.state.endDate,
-//         // Include other form fields...
-//       };
-  
-//       // Send data to the server using leaveApplicationService instead of leaveService
-//       const response = await leaveApplicationService.createLeave(leaveData);
-  
-//       // Handle success response
-//       console.log("Leave created:", response);
-  
-//       // Optionally, reset the form fields after submission
-//       this.setState({
-//         startDate: "",
-//         endDate: "",
-//         // Reset other form fields...
-//       });
-//     } catch (error) {
-//       console.error("Error submitting form:", error);
-//       // Handle error state appropriately
-//     }
-//   };
-  renderActionCell(row) {
-    // This method defines how the action cells should be rendered in the DataTable.
-    // Customize the content and appearance of action cells based on the provided 'row' data.
-    // You can add buttons, icons, or any other UI elements to represent actions.
-    // Make sure to handle the desired actions, such as deletion or approval, within this logic.
-    // If needed, you can access other components or external functions to perform specific actions.
-    // Ensure that the rendered JSX aligns with your application's design and functionality.
-    // Modify this method according to your specific requirements for handling actions in the DataTable.
-  }
-
   async onDeleteListId(leaveId) {
-    try {
-      await leaveApplicationService.deleteLeave(leaveId);
-      this.updateAppliedLeaveState(leaveId);
-    } catch (error) {
-      console.error("Error deleting leave:", error);
-    }
+    await leaveApplicationService.deleteLeave(leaveId);
+    let appliedLeave =
+      this.state.appliedLeave.length > 0 &&
+      this.state.appliedLeave.filter((al) => {
+        return al.leaveId !== leaveId;
+      });
+
+    let appliedLeaveByUsers =
+      this.state.appliedLeaveByUsers.length > 0 &&
+      this.state.appliedLeaveByUsers.filter((al) => {
+        return al.leaveId !== leaveId;
+      });
+    this.setState({
+      appliedLeave: appliedLeave,
+      appliedLeaveByUsers: appliedLeaveByUsers,
+    });
   }
 
   async onRejectListId(leaveId) {
-    try {
-      await this.getDetails(leaveId, "rejected");
-      let leaveApprovedReject = this.createLeaveApprovedReject(leaveId);
+    await this.getDetails(leaveId, "rejected");
 
-      await this.postApproveReject(leaveApprovedReject);
-
-      this.updateLeaveStatus(leaveId, "Rejected");
-    } catch (error) {
-      console.error("Error rejecting leave:", error);
-    }
-  }
-
-  async onApproveListId(leaveId) {
-    try {
-      await this.getDetails(leaveId, "approved");
-      let leaveApprovedReject = this.createLeaveApprovedReject(leaveId);
-
-      await this.postApproveReject(leaveApprovedReject);
-
-      this.updateLeaveStatus(leaveId, "Approved");
-    } catch (error) {
-      console.error("Error approving leave:", error);
-    }
-  }
-
-  async getDetails(leaveId, approverejected) {
-    try {
-      let { response } = await leaveApplicationService.getDetails(leaveId);
-
-      if (approverejected === "rejected") {
-        response.data.leaveDetails.status = "rejected";
-      } else {
-        response.data.leaveDetails.status = "approved";
-      }
-
-      this.setState({
-        isLoaded: false,
-        leaveDetails: response.data.leaveDetails,
-        acceptReject: response.data.leaveDetails.status,
-        reason: response.data.leaveDetails.rejectionReason,
-      });
-    } catch (error) {
-      console.error("Error fetching details:", error);
-      this.setState({
-        isLoaded: false,
-      });
-    }
-  }
-
-  async postApproveReject(leaveApprovedReject) {
-    try {
-      let { response } = await leaveApplicationService.ApprovedReject(
-        leaveApprovedReject
-      );
-
-      if (response && response.data.err) {
-        this.setState({
-          ...this.state,
-          errorMessage: response.data.err,
-        });
-      } else {
-        this.setState({
-          successMessage: response.data.message,
-        });
-      }
-    } catch (error) {
-      console.error("Error approving/rejecting leave:", error);
-      this.setState({
-        ...this.state,
-        errorMessage: "An error occurred while processing your request.",
-      });
-    }
-  }
-
-  createLeaveApprovedReject(leaveId) {
-    return {
+    let leaveApprovedReject = {
       approvedRejected: this.state.acceptReject,
       leaveId: leaveId,
       reasonRejection: this.state.reason,
@@ -172,49 +306,110 @@ class LeaveList extends Component {
       toEmail: this.state.leaveDetails.fromEmail,
       leaveWithoutApproval: this.state.leaveDetails.leaveWithoutApproval,
     };
-  }
 
-  updateLeaveStatus(leaveId, status) {
-    let appliedLeave = this.state.appliedLeave.map((al) => {
-      if (al.leaveId === leaveId) {
-        al.status = status;
-      }
-      return al;
-    });
+    await this.postApproveReject(leaveApprovedReject);
 
-    let appliedLeaveByUsers = this.state.appliedLeaveByUsers.map((al) => {
-      if (al.leaveId === leaveId) {
-        al.status = status;
+    for (let i = 0; i < this.state.appliedLeave.length; i++) {
+      if (this.state.appliedLeave[i].leaveId == leaveId) {
+        this.state.appliedLeave[i].status = "Rejected";
       }
-      return al;
-    });
+    }
+
+    for (let i = 0; i < this.state.appliedLeaveByUsers.length; i++) {
+      if (this.state.appliedLeaveByUsers[i].leaveId == leaveId) {
+        this.state.appliedLeaveByUsers[i].status = "Rejected";
+      }
+    }
 
     this.setState({
-      appliedLeave: appliedLeave,
-      appliedLeaveByUsers: appliedLeaveByUsers,
+      appliedLeave: this.state.appliedLeave,
+      appliedLeaveByUsers: this.state.appliedLeaveByUsers,
     });
   }
 
-  updateAppliedLeaveState(leaveId) {
-    let appliedLeave = this.state.appliedLeave.filter(
-      (al) => al.leaveId !== leaveId
-    );
-    let appliedLeaveByUsers = this.state.appliedLeaveByUsers.filter(
-      (al) => al.leaveId !== leaveId
-    );
+  async onApproveListId(leaveId) {
+    await this.getDetails(leaveId, "approved");
+
+    let leaveApprovedReject = {
+      approvedRejected: this.state.acceptReject,
+      leaveId: leaveId,
+      reasonRejection: this.state.reason,
+      modifiedBy: Auth.get("userId"),
+      modifiedOn: new Date(),
+      toEmail: this.state.leaveDetails.fromEmail,
+      leaveWithoutApproval: this.state.leaveDetails.leaveWithoutApproval,
+    };
+
+    await this.postApproveReject(leaveApprovedReject);
+
+    for (let i = 0; i < this.state.appliedLeave.length; i++) {
+      if (this.state.appliedLeave[i].leaveId == leaveId) {
+        this.state.appliedLeave[i].status = "Approved";
+      }
+    }
+
+    for (let i = 0; i < this.state.appliedLeaveByUsers.length; i++) {
+      if (this.state.appliedLeaveByUsers[i].leaveId == leaveId) {
+        this.state.appliedLeaveByUsers[i].status = "Approved";
+      }
+    }
 
     this.setState({
-      appliedLeave: appliedLeave,
-      appliedLeaveByUsers: appliedLeaveByUsers,
+      appliedLeave: this.state.appliedLeave,
+      appliedLeaveByUsers: this.state.appliedLeaveByUsers,
     });
   }
 
-  // componentDidMount() {
-  //     this.setAppliedLeaves('applied');
-  //     if (this.state.calendarData.length === 0) {
-  //         this.getAllLeavesForCalendar();
-  //     }
-  // }
+  async getDetails(leaveId, approverejected) {
+    let { response, err } = await leaveApplicationService.getDetails(leaveId);
+    this.setState({
+      isLoaded: true,
+    });
+
+    if (err) {
+      this.setState({
+        isLoaded: false,
+      });
+    } else if (response && response.data.err) {
+      this.setState({
+        isLoaded: false,
+      });
+    } else {
+      //console.log("response.data.leaveDetails",response.data.leaveDetails)
+      if (approverejected === "rejected") {
+        response.data.leaveDetails.status = "rejected";
+      } else {
+        response.data.leaveDetails.status = "approved";
+      }
+      this.setState({
+        isLoaded: false,
+        leaveDetails: response.data.leaveDetails,
+        acceptReject: response.data.leaveDetails.status,
+        reason: response.data.leaveDetails.rejectionReason,
+      });
+    }
+  }
+
+  async postApproveReject(leaveApprovedReject) {
+    let { response, err } = await leaveApplicationService.ApprovedReject(
+      leaveApprovedReject
+    );
+    if (err) {
+      this.setState({
+        ...this.state,
+        errorMessage: err,
+      });
+    } else if (response && response.data.err) {
+      this.setState({
+        ...this.state,
+        errorMessage: response.data.err,
+      });
+    } else {
+      this.setState({
+        successMessage: response.data.message,
+      });
+    }
+  }
   componentDidMount() {
     this.setAppliedLeaves("applied");
     if (this.state.calendarData.length === 0) {
@@ -227,59 +422,86 @@ class LeaveList extends Component {
       this.setState({ appliedLeaveByUsers: [] });
     }
   }
+  //   componentDidMount() {
+  //     // if (this.state.appliedLeave.length === 0 && this.state.appliedLeaveByUsers.length === 0) {
+  //     this.setAppliedLeaves("applied");
+  //     // }
+  //     if (this.state.calendarData.length === 0) {
+  //       this.getAllLeavesForCalendar();
+  //     }
+  //   }
 
   async getAllLeavesForCalendar() {
-    try {
-      let { response } =
-        await leaveApplicationService.getAllLeavesForCalendar();
+    let { response, err } =
+      await leaveApplicationService.getAllLeavesForCalendar();
+    this.setState({
+      isLoaded: true,
+    });
 
+    if (err) {
+      this.setState({
+        isLoaded: false,
+      });
+    } else if (response && response.data.err) {
+      this.setState({
+        isLoaded: false,
+      });
+    } else {
       if (response.data.result.length > 0) {
         this.setState({
           isLoaded: false,
           calendarData: response.data.result,
         });
       }
-    } catch (error) {
-      console.error("Error fetching calendar data:", error);
-      this.setState({
-        isLoaded: false,
-      });
     }
   }
-
   async setAppliedLeaves(flag) {
-    try {
-      let { response } = await leaveApplicationService.getAllAppliedLeaves(
-        flag
-      );
-      let role = Auth.get("userRole");
+    let { response, err } = await leaveApplicationService.getAllAppliedLeaves(
+      flag
+    );
 
-      if (role === "user" && response.data.appliedLeaves.length > 0) {
-        this.setState({
-          appliedLeave: response.data.appliedLeaves,
-          isLoaded: false,
-        });
-      } else if (response.data) {
-        this.setState({
-          appliedLeave: response.data.appliedLeaves,
-          appliedLeaveByUsers: response.data.userAppliedLeaves,
-          isLoaded: false,
-        });
-      }
-    } catch (error) {
-      console.error("Error setting applied leaves:", error);
+    if (err) {
       this.setState({
         isLoaded: false,
-        // Handle error state appropriately
       });
+    } else if (response && response.data.err) {
+      this.setState({
+        isLoaded: false,
+      });
+    } else {
+      let role = Auth.get("userRole");
+      if (role === "user") {
+        if (response.data && response.data.appliedLeaves.length > 0) {
+          this.setState({
+            appliedLeave: response.data.appliedLeaves,
+            isLoaded: false,
+          });
+        }
+      } else {
+        if (response.data) {
+          this.setState({
+            appliedLeave: response.data.appliedLeaves,
+            appliedLeaveByUsers: response.data.userAppliedLeaves,
+            isLoaded: false,
+          });
+        }
+      }
     }
   }
-
   async getAllAppliedLeavesforAdmin() {
-    try {
-      let { response } =
-        await leaveApplicationService.getAllAppliedLeavesforAdmin();
+    let { response, err } =
+      await leaveApplicationService.getAllAppliedLeavesforAdmin();
 
+    if (err) {
+      this.setState({
+        isLoaded: false,
+      });
+    } else if (response && response.data.err) {
+      this.setState({
+        isLoaded: false,
+      });
+    } else {
+      // console.log("getAllAppliedLeavesforAdmin", response.data);
       if (response.data) {
         this.setState({
           appliedLeaveByUsers: response.data,
@@ -287,12 +509,6 @@ class LeaveList extends Component {
           isLoaded: false,
         });
       }
-    } catch (error) {
-      console.error("Error getting all applied leaves for admin:", error);
-      this.setState({
-        isLoaded: false,
-        // Handle error state appropriately
-      });
     }
   }
   onSelectViewChange(e) {
@@ -301,7 +517,9 @@ class LeaveList extends Component {
       selectedView: selectedView,
     });
   }
+
   render() {
+    //console.log("this.state.leaveDetails",this.state.leaveDetails);
     let viewList = window.propeakConfigData.calenderViews.map((module, i) => {
       return (
         <option value={module.id} key={module.id}>
@@ -309,6 +527,7 @@ class LeaveList extends Component {
         </option>
       );
     });
+    // console.log("appliedLeaveByUsers", this.state.appliedLeaveByUsers);
     const dataTable = (
       <DataTable
         className="data-table"
@@ -321,15 +540,14 @@ class LeaveList extends Component {
         }}
         width="100%"
         headers={
-          this.state.appliedLeave && this.state.appliedLeave.length > 0
+          this.state.appliedLeave.length > 0
             ? this.state.appliedLeaveheaders
             : this.state.userAppliedLeaveheaders
         }
         data={
-          this.state.appliedLeave && this.state.appliedLeave.length > 0
+          this.state.appliedLeave.length > 0
             ? this.state.appliedLeave
-            : this.state.appliedLeaveByUsers &&
-              this.state.appliedLeaveByUsers.length > 0
+            : this.state.appliedLeaveByUsers.length > 0
             ? this.state.appliedLeaveByUsers
             : []
         }
@@ -372,6 +590,7 @@ class LeaveList extends Component {
                   </h4>
                 </div>
               </div>
+
               <div className="row">
                 {this.state.selectedView === "calendarView" ? (
                   <div className="col-sm-10"></div>
@@ -421,7 +640,7 @@ class LeaveList extends Component {
                             id="all-leaves-tab"
                             data-toggle="pill"
                             href="#all-leaves"
-                            role="tabpanel"
+                            role="tab"
                             aria-controls="all-leaves"
                             aria-selected="false"
                           >
@@ -440,7 +659,7 @@ class LeaveList extends Component {
                             id="all-user-leaves-tab"
                             data-toggle="pill"
                             href="#all-user-leaves"
-                            role="tabpanel"
+                            role="tab"
                             aria-controls="all-leaves"
                             aria-selected="false"
                           >
@@ -477,6 +696,7 @@ class LeaveList extends Component {
                   </div>
                 </div>
               </div>
+
               <div className="row">
                 <div id="largeCalendar">
                   {this.state.selectedView === "calendarView" ? (
@@ -487,9 +707,9 @@ class LeaveList extends Component {
                         right: "month,basicWeek,basicDay",
                       }}
                       defaultDate={new Date()}
-                      navLinks={true}
+                      navLinks={true} // can click day/week names to navigate views
                       editable={true}
-                      eventLimit={true}
+                      eventLimit={true} // allow "more" link when too many events
                       events={
                         this.state.calendarData ? this.state.calendarData : []
                       }
