@@ -14,7 +14,7 @@ var holidayList = [];
 
 // Save the leave application
 exports.leaveApplicationSave = async (request, response) => {
-  console.log(request,response,"zozozozozzozozzozoz")
+  console.log(request, response, "zozozozozzozozzozoz");
   try {
     const {
       createdBy,
@@ -53,9 +53,9 @@ exports.leaveApplicationSave = async (request, response) => {
       status: "pending",
       rejectionReason: "",
     });
-    console.log('Received leave application:', request.body.leaveApplication); // Log received leave application
+    console.log("Received leave application:", request.body.leaveApplication); // Log received leave application
     const savedLeave = await newLeaveApplication.save();
-    console.log('Saved leave application:', savedLeave); // Log saved leave application
+    console.log("Saved leave application:", savedLeave); // Log saved leave application
 
     logInfo(savedLeave, "Applied for leave");
 
@@ -148,11 +148,11 @@ exports.leaveTypes_get_all = (request, response) => {
     isActive: "true",
   })
     .then((result) => {
-      // console.log("Leave Types Result:", result); 
+      // console.log("Leave Types Result:", result);
       response.json(result);
     })
     .catch((err) => {
-      console.error("Error in leaveTypes_get_all:", err); 
+      console.error("Error in leaveTypes_get_all:", err);
       response.json({
         success: false,
         msg: `Something went wrong ${err}`,
@@ -266,7 +266,6 @@ exports.getAllAppliedLeavesforAdmin = (request, response) => {
       });
     });
 };
-
 
 exports.getAllLeaves = (request, response) => {
   // checking for current logged in user details
