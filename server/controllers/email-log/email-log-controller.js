@@ -1,9 +1,9 @@
-const EmailLogs = require('../../models/emaillog/email-log-model');
-const jwt = require('jsonwebtoken');
-const secret = require('../../config/secret');
-const { logError, logInfo } = require('../../common/logger');
+const EmailLogs = require("../../models/emaillog/email-log-model");
+const jwt = require("jsonwebtoken");
+const secret = require("../../config/secret");
+const { logError, logInfo } = require("../../common/logger");
 
-exports.insertEmailLog = (userEmail,ownerEmail,subject,data) => {
+exports.insertEmailLog = (userEmail, ownerEmail, subject, data) => {
   try {
     let EmailDate = new Date();
     let newEmailLogs = {
@@ -12,20 +12,18 @@ exports.insertEmailLog = (userEmail,ownerEmail,subject,data) => {
       subject: subject,
       bodyText: data,
       createdBy: "scheduler",
-      createdOn: EmailDate
+      createdOn: EmailDate,
     };
-    logInfo(newEmailLogs,"insertEmailLog newEmailLogs");
-  
+    logInfo(newEmailLogs, "insertEmailLog newEmailLogs");
+
     let c = new EmailLogs(newEmailLogs);
 
     c.save(function (err) {
       if (err) {
-          logError(err,"insertEmailLog err");
+        logError(err, "insertEmailLog err");
       }
-      
     });
+  } catch (e) {
+    logError(err, "insertEmailLog catch err");
   }
-  catch(e) {
-    logError(err,"insertEmailLog catch err");
-  } 
-}
+};

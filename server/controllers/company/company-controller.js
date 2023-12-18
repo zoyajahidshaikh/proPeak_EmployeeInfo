@@ -1,23 +1,23 @@
-const mongoose = require('mongoose');
-const Company = require('../../models/company/company-model');
-const jwt = require('jsonwebtoken');
-const { logError, logInfo } = require('../../common/logger');
-const access = require('../../check-entitlements');
-const sortData = require('../../common/common');
-const cacheManager = require('../../redis');
-const { Observable } = require('rxjs/Observable');
+const mongoose = require("mongoose");
+const Company = require("../../models/company/company-model");
+const jwt = require("jsonwebtoken");
+const { logError, logInfo } = require("../../common/logger");
+const access = require("../../check-entitlements");
+const sortData = require("../../common/common");
+const cacheManager = require("../../redis");
+const { Observable } = require("rxjs/Observable");
 const { bindNodeCallback } = require("rxjs/observable/bindNodeCallback");
 const { fromPromise } = require("rxjs/observable/fromPromise");
 const errors = {
-  COMPANY_DOESNT_EXIST: 'Company does not exist',
-  ADDCOMPANYERROR: 'Error occurred while adding the company',
-  EDITCOMPANYERROR: 'Error occurred while updating the company',
-  DELETECOMPANYERROR: 'Error occurred while deleting the company',
-  "NOT_AUTHORIZED": "Your are not authorized"
+  COMPANY_DOESNT_EXIST: "Company does not exist",
+  ADDCOMPANYERROR: "Error occurred while adding the company",
+  EDITCOMPANYERROR: "Error occurred while updating the company",
+  DELETECOMPANYERROR: "Error occurred while deleting the company",
+  NOT_AUTHORIZED: "Your are not authorized",
 };
 
 //Get All Company
-exports.getAllCompanies = (async (req, res) => {
+exports.getAllCompanies = async (req, res) => {
   // let userRole = req.userInfo.userRole.toLowerCase();
   // let accessCheck = access.checkEntitlements(userRole);
   // if(accessCheck === false) {
@@ -25,30 +25,31 @@ exports.getAllCompanies = (async (req, res) => {
   //     return;
   // }
 
-  var cachedData = await cacheManager.getCachedData("companyData"); 
+  var cachedData = await cacheManager.getCachedData("companyData");
 
-  if(!!cachedData){
-
-    if(cachedData.length > 0){
+  if (!!cachedData) {
+    if (cachedData.length > 0) {
       res.json(cachedData);
       return;
     }
   }
 
-  let getAllCompanies = fromPromise(Company.find({ $or: [{ isDeleted: null }, { isDeleted: false }] }));
+  let getAllCompanies = fromPromise(
+    Company.find({ $or: [{ isDeleted: null }, { isDeleted: false }] })
+  );
   getAllCompanies.subscribe(
-    result => {
-     
+    (result) => {
       // cacheManager.setCachedData("companyData", result);
-      sortData.sort(result, 'companyName');
-        cacheManager.setCachedData("companyData", result);
-      
-        
+      sortData.sort(result, "companyName");
+      cacheManager.setCachedData("companyData", result);
+
       res.json(result);
     },
-    err => {
+    (err) => {
       //console.log(err);
-      res.status(500).json({ success: false, msg: `Something went wrong. ${err}` });
+      res
+        .status(500)
+        .json({ success: false, msg: `Something went wrong. ${err}` });
     }
   );
 
@@ -61,26 +62,25 @@ exports.getAllCompanies = (async (req, res) => {
   //   .catch((err) => {
   //     res.status(500).json({ success: false, msg: `Something went wrong. ${err}` });
   //   });
-})
+};
 
 //Get CompanyById
-exports.getCompanyById = ((req, res) => {
+exports.getCompanyById = (req, res) => {
   let userRole = req.userInfo.userRole.toLowerCase();
   let accessCheck = access.checkEntitlements(userRole);
   if (accessCheck === false) {
     res.json({ err: errors.NOT_AUTHORIZED });
     return;
   }
-  Company.find({ _id: req.params.id })
-    .then((result) => {
-      res.json({
-        data: result
-      })
-    })
-})
+  Company.find({ _id: req.params.id }).then((result) => {
+    res.json({
+      data: result,
+    });
+  });
+};
 
 // CREATE
-exports.createCompany = ((req, res) => {
+exports.createCompany = (req, res) => {
   try {
     let userRole = req.userInfo.userRole.toLowerCase();
     let accessCheck = access.checkEntitlements(userRole);
@@ -91,14 +91,15 @@ exports.createCompany = ((req, res) => {
     logInfo(req.body, "createCompany");
 
     let newCompany = new Company(req.body);
-    newCompany.save()
+    newCompany
+      .save()
       .then((result) => {
         cacheManager.clearCachedData("companyData");
         logInfo(result, "createCompany result");
         res.json({
           success: true,
           msg: `Successfully added!`,
-          result: result
+          result: result,
         });
       })
       .catch((err) => {
@@ -106,16 +107,13 @@ exports.createCompany = ((req, res) => {
           res.json({ err: errors.ADDCOMPANYERROR });
         }
       });
-  }
-  catch (e) {
+  } catch (e) {
     logError(e, "createCompany e");
   }
-});
+};
 
-
-exports.deleteCompany = ((req, res) => {
+exports.deleteCompany = (req, res) => {
   try {
-
     let userRole = req.userInfo.userRole.toLowerCase();
     let accessCheck = access.checkEntitlements(userRole);
     if (accessCheck === false) {
@@ -124,28 +122,30 @@ exports.deleteCompany = ((req, res) => {
     }
     logInfo(req.body, "deleteCompany");
     let updatedCompany = req.body;
-    Company.findOneAndUpdate({ "_id": updatedCompany[0]._id }, { $set: { 'isDeleted': updatedCompany[0].isDeleted } })
+    Company.findOneAndUpdate(
+      { _id: updatedCompany[0]._id },
+      { $set: { isDeleted: updatedCompany[0].isDeleted } }
+    )
       .then((result) => {
         cacheManager.clearCachedData("companyData");
         logInfo(result, "deleteCompany result");
         res.json({
           success: true,
           msg: `Successfully Updated!`,
-          result: result
-        })
+          result: result,
+        });
       })
       .catch((err) => {
         if (err.errors) {
           res.json({ err: errors.DELETECOMPANYERROR });
         }
       });
-  }
-  catch (e) {
+  } catch (e) {
     logError(e, "deleteCompany e");
   }
-})
+};
 
-exports.updateCompany = ((req, res) => {
+exports.updateCompany = (req, res) => {
   try {
     let userRole = req.userInfo.userRole.toLowerCase();
     let accessCheck = access.checkEntitlements(userRole);
@@ -155,23 +155,22 @@ exports.updateCompany = ((req, res) => {
     }
     let updatedcompany = req.body;
     logInfo(req.body, "updateCompany");
-    Company.findOneAndUpdate({ "_id": req.body._id }, updatedcompany)
+    Company.findOneAndUpdate({ _id: req.body._id }, updatedcompany)
       .then((result) => {
         cacheManager.clearCachedData("companyData");
         logInfo(result, "updateCompany result");
         res.json({
           success: true,
           msg: `Successfully Updated!`,
-          result: result
-        })
+          result: result,
+        });
       })
       .catch((err) => {
         if (err.errors) {
           res.json({ err: errors.EDITCOMPANYERROR });
         }
       });
-  }
-  catch (e) {
+  } catch (e) {
     logError(e, "updateCompany e");
   }
-})
+};
