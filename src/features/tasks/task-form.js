@@ -1568,21 +1568,43 @@ export default class TaskForm extends React.Component {
     });
   }
 
+  // async addTaskMsg(msg) {
+  //   let objTasks = Object.assign([], this.state.tasks);
+  //   let tasks = objTasks.map((t) => {
+  //     if (t._id === msg.taskId) {
+  //       t.messages = [msg, ...t.messages];
+  //     }
+  //     return t;
+  //   });
+  //   this.setState({
+  //     tasks: tasks,
+  //     messages: [msg, ...this.state.messages],
+  //     //updatedTime:dateUtil.getTime()
+  //   });
+  // }
   async addTaskMsg(msg) {
     let objTasks = Object.assign([], this.state.tasks);
     let tasks = objTasks.map((t) => {
       if (t._id === msg.taskId) {
-        t.messages = [msg, ...t.messages];
+        t.messages = [msg, ...(t.messages || [])]; // Ensure messages is an array or use an empty array as default
       }
       return t;
     });
+  
+    let newMessages = [msg];
+    if (Array.isArray(this.state.messages)) {
+      newMessages = newMessages.concat(this.state.messages);
+    } else {
+      newMessages = [msg]; // Set a default value if messages is not an array
+    }
+  
     this.setState({
       tasks: tasks,
-      messages: [msg, ...this.state.messages],
-      //updatedTime:dateUtil.getTime()
+      messages: newMessages,
+      //updatedTime: dateUtil.getTime()
     });
   }
-
+  
   deleteMessageTask(taskId, messageId) {
     let objTasks = Object.assign([], this.state.tasks);
     let tasks = objTasks.map((t) => {

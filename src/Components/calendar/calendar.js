@@ -4,32 +4,13 @@ import moment from 'moment';
 import './calendar.css';
 import './modal.css'
 
-// const style = {
-//     position: "relative",
-//     margin: "50px auto"
-// }
-
 export default class Calendar extends React.Component {
     constructor(props) {
         super(props);
 
         this.width = props.width || "250px";
         this.style = props.style || {};
-        this.style.width = this.width // add this
-
-        // this.state = {
-        //     dateContext: moment(),
-        //     today: moment(),
-        //     showMonthPopup: false,
-        //     showYearPopup: false,
-        //     selectedDay: moment(this.props.selectedDate).format('DD'),
-        //     selectedMonth: moment(this.props.selectedDate).format('MM'),
-        //     selectedYear: moment(this.props.selectedDate).format('YYYY'),
-        //     selectedDate: moment().format('YYYY-MM-DD'),
-        //     dateValue: moment(this.props.selectedDate).format('YYYY-MM-DD'),
-        //     toggleModel: false
-        // }
-
+        this.style.width = this.width 
         this.state = {
             dateContext: moment(),
             today: moment(),
